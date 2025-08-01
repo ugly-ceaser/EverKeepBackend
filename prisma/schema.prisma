@@ -1,0 +1,109 @@
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id                      String     @id @default(uuid())
+  email                   String     @unique
+  phone                   String     @unique
+  fullName                String
+  isVerified              Boolean    @default(false)
+  lastLogin               DateTime   @default(now())
+  inactivityThresholdDays Int        @default(60)
+  createdAt               DateTime   @default(now())
+  updatedAt               DateTime   @updatedAt
+  deletedAt               DateTime?  @db.Timestamp(6)
+
+  contacts                Contact[]
+  vaults                  Vault[]
+  notifications           Notification[]
+
+  @@index([email])
+  @@index([phone])
+  @@index([deletedAt])
+}
+
+model Contact {
+  id         String     @id @default(uuid())
+  userId     String
+  name       String
+  email      String
+  phone      String?
+  role       String?
+  verified   Boolean    @default(false)
+  timestamp  DateTime   @default(now())
+  deletedAt  DateTime?  @db.Timestamp(6)
+
+  user       User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  recipients VaultRecipient[]
+
+  @@index([userId])
+  @@index([email])
+  @@index([deletedAt])
+}
+
+model Notification {
+  id         String     @id @default(uuid())
+  userId     String
+  title      String?
+  content    String?
+  timestamp  DateTime   @default(now())
+  deletedAt  DateTime?  @db.Timestamp(6)
+
+  user       User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([deletedAt])
+}
+
+model Vault {
+  id                String     @id @default(uuid())
+  userId            String
+  name              String
+  description       String?
+  deliveredAtDate   DateTime?
+  timestamp         DateTime   @default(now())
+  deletedAt         DateTime?  @db.Timestamp(6)
+
+  user              User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  entries           VaultEntry[]
+  recipients        VaultRecipient[]
+
+  @@index([userId])
+  @@index([deletedAt])
+}
+
+model VaultEntry {
+  id         String     @id @default(uuid())
+  vaultId    String
+  type       String
+  content    String
+  timestamp  DateTime   @default(now())
+  deletedAt  DateTime?  @db.Timestamp(6)
+
+  vault      Vault      @relation(fields: [vaultId], references: [id], onDelete: Cascade)
+
+  @@index([vaultId])
+  @@index([deletedAt])
+}
+
+model VaultRecipient {
+  id         String     @id @default(uuid())
+  vaultId    String
+  contactId  String
+  timestamp  DateTime   @default(now())
+  deletedAt  DateTime?  @db.Timestamp(6)
+
+  vault      Vault      @relation(fields: [vaultId], references: [id], onDelete: Cascade)
+  contact    Contact    @relation(fields: [contactId], references: [id], onDelete: Cascade)
+
+  @@index([vaultId])
+  @@index([contactId])
+  @@index([deletedAt])
+}
