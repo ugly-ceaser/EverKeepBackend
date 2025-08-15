@@ -10,7 +10,7 @@ export const authMiddleware = (
   next: NextFunction
 ): void => {
   try {
-    const authHeader = req.headers.authorization;
+    const authHeader = req.headers?.authorization;
     
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
       throw new AppError('Access token required', 401);
@@ -22,7 +22,7 @@ export const authMiddleware = (
       throw new AppError('Access token required', 401);
     }
 
-    const decoded = jwt.verify(token, env.JWT_SECRET) as any;
+    const decoded = jwt.verify(token, env?.JWT_SECRET || '') as any;
     req.user = decoded;
     
     next();
@@ -41,11 +41,11 @@ export const optionalAuthMiddleware = (
   next: NextFunction
 ): void => {
   try {
-    const authHeader = req.headers.authorization;
+    const authHeader = req.headers?.authorization;
     
     if (authHeader && authHeader.startsWith('Bearer ')) {
       const token = authHeader.substring(7);
-      const decoded = jwt.verify(token, env.JWT_SECRET) as any;
+      const decoded = jwt.verify(token, env?.JWT_SECRET || '') as any;
       req.user = decoded;
     }
     

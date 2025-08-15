@@ -2,8 +2,8 @@ import { Request, Response } from 'express';
 import { asyncHandler, AppError } from '../middleware/error.middleware';
 import { cloudinary } from '../config/cloudinary';
 import multer from 'multer';
-import https from 'https';
-import { URL } from 'url';
+import https from 'node:https';
+import { URL } from 'node:url';
 
 const storage = multer.memoryStorage();
 export const uploadMiddleware = multer({ storage }).single('file');
@@ -69,8 +69,6 @@ export const proxyDownload = asyncHandler(async (req: Request, res: Response) =>
       r.pipe(res);
     })
     .on('error', (err) => {
-      // eslint-disable-next-line no-console
-      console.error('Proxy download error:', err);
       res.status(500).end('Download failed');
     });
 });

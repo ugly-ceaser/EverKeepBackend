@@ -10,7 +10,7 @@ const stream = {
 };
 
 // Morgan format
-const format = env.NODE_ENV === 'production' 
+const format = env?.NODE_ENV === 'production' 
   ? 'combined' 
   : ':method :url :status :res[content-length] - :response-time ms';
 

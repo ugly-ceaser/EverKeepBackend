@@ -1,7 +1,7 @@
 
 import winston from 'winston';
 import DailyRotateFile from 'winston-daily-rotate-file';
-import { env } from './env'; // Adjust path if necessary
+import { env } from './env';
 
 const { combine, timestamp, errors, json, colorize, printf } = winston.format;
 
@@ -23,11 +23,11 @@ const fileFormat = combine(
 
 // Winston logger instance
 export const logger = winston.createLogger({
-  level: env.LOG_LEVEL || 'info',
+  level: env?.LOG_LEVEL || 'info',
   format: fileFormat,
   defaultMeta: { service: 'backend-api' },
   transports: [
-    ...(env.NODE_ENV === 'development'
+    ...(env?.NODE_ENV === 'development'
       ? [
           new winston.transports.Console({
             format: consoleFormat,
@@ -40,8 +40,8 @@ export const logger = winston.createLogger({
       filename: 'logs/error-%DATE%.log',
       datePattern: 'YYYY-MM-DD',
       level: 'error',
-      maxSize: env.LOG_MAX_SIZE || '20m',
-      maxFiles: env.LOG_MAX_FILES || '14d',
+      maxSize: env?.LOG_MAX_SIZE || '20m',
+      maxFiles: env?.LOG_MAX_FILES || '14d',
       zippedArchive: true,
     }),
 
@@ -49,20 +49,20 @@ export const logger = winston.createLogger({
     new DailyRotateFile({
       filename: 'logs/combined-%DATE%.log',
       datePattern: 'YYYY-MM-DD',
-      maxSize: env.LOG_MAX_SIZE || '20m',
-      maxFiles: env.LOG_MAX_FILES || '14d',
+      maxSize: env?.LOG_MAX_SIZE || '20m',
+      maxFiles: env?.LOG_MAX_FILES || '14d',
       zippedArchive: true,
     }),
   ],
 });
 
 // Handle unhandled promise rejections
-process.on('unhandledRejection', (reason: any, promise) => {
+process.on('unhandledRejection', (reason: unknown, promise: Promise<unknown>) => {
   logger.error('Unhandled Rejection at:', { promise, reason });
 });
 
 // Handle uncaught exceptions
-process.on('uncaughtException', (error) => {
+process.on('uncaughtException', (error: Error) => {
   logger.error('Uncaught Exception:', error);
   process.exit(1); // Optional: gracefully shutdown instead
 });

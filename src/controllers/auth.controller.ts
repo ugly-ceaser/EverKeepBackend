@@ -10,8 +10,8 @@ import { Prisma } from '@prisma/client';
 import { ActivityLogger } from '../services/activityLogger';
 
 const signToken = (userId: string, email: string) => {
-  const secret: Secret = env.JWT_SECRET as unknown as Secret;
-  const options: SignOptions = { expiresIn: env.JWT_EXPIRES_IN as unknown as any };
+  const secret: Secret = (env?.JWT_SECRET || '') as unknown as Secret;
+  const options: SignOptions = { expiresIn: (env?.JWT_EXPIRES_IN || '7d') as unknown as any };
   return jwt.sign({ userId, email }, secret, options);
 };
 

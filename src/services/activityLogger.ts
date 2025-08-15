@@ -17,8 +17,7 @@ export class ActivityLogger {
       });
     } catch (err) {
       // Do not block main flow on logging issues
-      // eslint-disable-next-line no-console
-      console.warn('Activity log failed:', err);
+      // Silently fail on logging errors
     }
   }
 

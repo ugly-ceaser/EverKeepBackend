@@ -11,7 +11,9 @@ export class AppError extends Error {
     this.statusCode = statusCode;
     this.isOperational = isOperational;
     
-    Error.captureStackTrace(this, this.constructor);
+    if (Error.captureStackTrace) {
+      Error.captureStackTrace(this, this.constructor);
+    }
   }
 }
 
@@ -49,7 +51,7 @@ export const errorMiddleware = (
   };
 
   // Include stack trace in development
-  if (env.NODE_ENV === 'development') {
+  if (env?.NODE_ENV === 'development') {
     errorResponse.stack = error.stack;
   }
 

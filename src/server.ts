@@ -11,9 +11,9 @@ const startServer = async (): Promise<void> => {
     await connectToDatabase();
 
     // Start Express server
-    const server = app.listen(env.PORT, () => {
-      logger.info(`🚀 Server running on port ${env.PORT} in ${env.NODE_ENV} mode`);
-      logger.info(`📘 API Docs: http://localhost:${env.PORT}/api-docs`);
+    const server = app.listen(env?.PORT || 3000, () => {
+      logger.info(`🚀 Server running on port ${env?.PORT || 3000} in ${env?.NODE_ENV || 'development'} mode`);
+      logger.info(`📘 API Docs: http://localhost:${env?.PORT || 3000}/api-docs`);
     });
 
     // Graceful shutdown
