@@ -2,6 +2,15 @@ import { z } from 'zod';
 import dotenv from 'dotenv';
 dotenv.config();
 
+const booleanFromString = z.preprocess((val) => {
+  if (typeof val === 'boolean') return val;
+  if (typeof val === 'number') return val !== 0;
+  if (typeof val === 'string') {
+    const lower = val.toLowerCase();
+    return lower === 'true' || lower === '1' || lower === 'yes' || lower === 'on';
+  }
+  return false;
+}, z.boolean());
 
 const envSchema = z.object({
   NODE_ENV: z.enum(['development', 'production', 'test']).default('development'),
@@ -16,7 +25,7 @@ const envSchema = z.object({
   LOG_LEVEL: z.enum(['error', 'warn', 'info', 'debug']).default('info'),
   LOG_MAX_SIZE: z.string().default('20m'),
   LOG_MAX_FILES: z.string().default('14d'),
-  SWAGGER_ENABLED: z.string().transform(Boolean).default('1'),
+  SWAGGER_ENABLED: booleanFromString.default(true),
 });
 
 const validateEnv = () => {

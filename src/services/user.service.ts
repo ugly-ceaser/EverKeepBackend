@@ -1,5 +1,5 @@
 import bcrypt from 'bcryptjs';
-import { UserRepository, userRepository } from '../repository/user.repository';
+import { UserRepository, userRepository } from '../repositories/user.repository';
 import { CreateUserRequest, UpdateUserRequest, User } from '../types/user.types';
 import { AppError } from '../middleware/error.middleware';
 import { PaginationParams } from '../types/common.types';
@@ -16,24 +16,20 @@ export class UserService {
     const { password, ...rest } = userData;
     const hashedPassword = await bcrypt.hash(password, 12);
 
-    const user = await this.userRepo.create({...rest,hashedPassword, });
+    const user = await this.userRepo.create({ ...rest, hashedPassword });
 
-    // Return user without password
-    // If user contains password field (even if not used), destructure to remove it
-    // But since in repo you're storing `hashedPassword`, it's not needed, but done just in case
-    const { password: _, ...userWithoutPassword } = user;
+    const { password: _, ...userWithoutPassword } = user as any;
     return userWithoutPassword;
   }
 
   async getUserById(id: string): Promise<Omit<User, 'password'>> {
     const user = await this.userRepo.findById(id);
 
-    if (!user || user.deletedAt) {
+    if (!user) {
       throw new AppError('User not found', 404);
     }
 
-    const { password, ...userWithoutPassword } = user;
-    return userWithoutPassword;
+    return user as any;
   }
 
   async getUserByEmail(email: string): Promise<User | null> {
@@ -50,16 +46,13 @@ export class UserService {
       this.userRepo.count(),
     ]);
 
-    const filteredUsers = users.filter(user => !user.deletedAt);
-    const cleanUsers = filteredUsers.map(({ password, ...u }) => u);
-
     return {
-      users: cleanUsers,
+      users,
       pagination: {
         page,
         limit,
-        total: filteredUsers.length,
-        totalPages: Math.ceil(filteredUsers.length / limit),
+        total,
+        totalPages: Math.ceil(total / limit),
       },
     };
   }
@@ -67,16 +60,15 @@ export class UserService {
   async updateUser(id: string, updateData: UpdateUserRequest): Promise<Omit<User, 'password'>> {
     const user = await this.userRepo.update(id, updateData);
 
-    if (!user || user.deletedAt) {
+    if (!user) {
       throw new AppError('User not found', 404);
     }
 
-    const { password, ...userWithoutPassword } = user;
-    return userWithoutPassword;
+    return user as any;
   }
 
   async softDeleteUser(id: string): Promise<void> {
-    const user = await this.userRepo.softDelete(id);
+    const user = await this.userRepo.delete(id);
     if (!user) {
       throw new AppError('User not found or already deleted', 404);
     }

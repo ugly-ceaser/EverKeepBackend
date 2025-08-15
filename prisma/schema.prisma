@@ -11,6 +11,7 @@ datasource db {
 model User {
   id                      String     @id @default(uuid())
   email                   String     @unique
+  password                String
   phone                   String     @unique
   fullName                String
   isVerified              Boolean    @default(false)
@@ -23,6 +24,8 @@ model User {
   contacts                Contact[]
   vaults                  Vault[]
   notifications           Notification[]
+  emailVerificationTokens EmailVerificationToken[]
+  passwordResetTokens     PasswordResetToken[]
 
   @@index([email])
   @@index([phone])
@@ -46,6 +49,7 @@ model Contact {
   @@index([userId])
   @@index([email])
   @@index([deletedAt])
+  @@unique([userId, email])
 }
 
 model Notification {
@@ -87,9 +91,15 @@ model VaultEntry {
   timestamp  DateTime   @default(now())
   deletedAt  DateTime?  @db.Timestamp(6)
 
+  // Parent-child relation to link attachments to a message
+  parentId   String?
+  parent     VaultEntry? @relation("ParentEntry", fields: [parentId], references: [id])
+  attachments VaultEntry[] @relation("ParentEntry")
+
   vault      Vault      @relation(fields: [vaultId], references: [id], onDelete: Cascade)
 
   @@index([vaultId])
+  @@index([parentId])
   @@index([deletedAt])
 }
 
@@ -106,4 +116,34 @@ model VaultRecipient {
   @@index([vaultId])
   @@index([contactId])
   @@index([deletedAt])
+}
+
+model EmailVerificationToken {
+  id        String   @id @default(uuid())
+  userId    String
+  token     String   @unique
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime @default(now())
+
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([token])
+  @@index([expiresAt])
+}
+
+model PasswordResetToken {
+  id        String   @id @default(uuid())
+  userId    String
+  token     String   @unique
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime @default(now())
+
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([token])
+  @@index([expiresAt])
 }

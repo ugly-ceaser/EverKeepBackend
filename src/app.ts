@@ -18,9 +18,19 @@ app.set('trust proxy', 1);
 
 // Security middleware
 app.use(helmet());
+
+// CORS with multi-origin support (comma-separated in CORS_ORIGIN)
+const allowedOrigins = env.CORS_ORIGIN.split(',').map((o) => o.trim());
 app.use(cors({
-  origin: env.CORS_ORIGIN,
+  origin: (origin, callback) => {
+    if (!origin) return callback(null, true); // allow non-browser or same-origin
+    if (allowedOrigins.includes('*') || allowedOrigins.includes(origin)) {
+      return callback(null, true);
+    }
+    return callback(new Error('Not allowed by CORS'));
+  },
   credentials: true,
+  optionsSuccessStatus: 204,
 }));
 
 // Body parsing middleware

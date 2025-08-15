@@ -1,11 +1,10 @@
-import { PrismaClient, User } from '@prisma/client';
+import { User } from '@prisma/client';
 import { CreateUserRequest, UpdateUserRequest } from '../types/user.types';
-
-const prisma = new PrismaClient();
+import { prisma } from '../config/database';
 
 export class UserRepository {
-  async create(userData: CreateUserRequest & { hashedPassword: string }): Promise<User> {
-    const { password, hashedPassword, ...data } = userData;
+  async create(userData: Omit<CreateUserRequest, 'password'> & { hashedPassword: string }): Promise<User> {
+    const { hashedPassword, ...data } = userData;
     return prisma.user.create({
       data: {
         ...data,
@@ -14,18 +13,22 @@ export class UserRepository {
     });
   }
 
-  async findById(id: string): Promise<User | null> {
+  async findById(id: string): Promise<Omit<User, 'password'> | null> {
     return prisma.user.findFirst({
       where: { id, deletedAt: null },
       select: {
         id: true,
         email: true,
-        firstName: true,
-        lastName: true,
+        fullName: true,
+        phone: true,
+        isVerified: true,
+        lastLogin: true,
+        inactivityThresholdDays: true,
         createdAt: true,
         updatedAt: true,
+        deletedAt: true,
       },
-    });
+    }) as any;
   }
 
   async findByEmail(email: string): Promise<User | null> {
@@ -34,7 +37,7 @@ export class UserRepository {
     });
   }
 
-  async findAll(skip: number = 0, take: number = 10): Promise<User[]> {
+  async findAll(skip: number = 0, take: number = 10): Promise<Array<Omit<User, 'password'>>> {
     return prisma.user.findMany({
       where: { deletedAt: null },
       skip,
@@ -42,30 +45,38 @@ export class UserRepository {
       select: {
         id: true,
         email: true,
-        firstName: true,
-        lastName: true,
+        fullName: true,
+        phone: true,
+        isVerified: true,
+        lastLogin: true,
+        inactivityThresholdDays: true,
         createdAt: true,
         updatedAt: true,
+        deletedAt: true,
       },
       orderBy: {
         createdAt: 'desc',
       },
-    });
+    }) as any;
   }
 
-  async update(id: string, userData: UpdateUserRequest): Promise<User> {
+  async update(id: string, userData: UpdateUserRequest): Promise<Omit<User, 'password'>> {
     return prisma.user.update({
       where: { id },
       data: userData,
       select: {
         id: true,
         email: true,
-        firstName: true,
-        lastName: true,
+        fullName: true,
+        phone: true,
+        isVerified: true,
+        lastLogin: true,
+        inactivityThresholdDays: true,
         createdAt: true,
         updatedAt: true,
+        deletedAt: true,
       },
-    });
+    }) as any;
   }
 
   // ✅ Soft delete instead of hard delete

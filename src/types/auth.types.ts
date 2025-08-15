@@ -15,8 +15,8 @@ export interface LoginResponse {
   user: {
     id: string;
     email: string;
-    firstName: string;
-    lastName: string;
+    fullName: string;
+    phone: string;
   };
   token: string;
 }
