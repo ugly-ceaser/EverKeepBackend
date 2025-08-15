@@ -6,7 +6,7 @@
     "scripts": {
         "dev": "ts-node-dev --respawn --transpile-only src/server.ts",
         "build": "tsc --project tsconfig.json",
-        "start": "node dist/server.js",
+        "start": "npx prisma generate && node dist/server.js",
         "lint": "eslint src/**/*.ts",
         "lint:fix": "eslint src/**/*.ts --fix",
         "format": "prettier --write src/**/*.ts",
@@ -29,6 +29,8 @@
         "@types/morgan": "^1.9.9",
         "@types/swagger-jsdoc": "^6.0.4",
         "@types/swagger-ui-express": "^4.1.6",
+        "@types/cors": "^2.8.17",
+        "@types/compression": "^1.7.5",
         "bcryptjs": "^2.4.3",
         "cloudinary": "^1.41.3",
         "compression": "^1.7.4",
@@ -48,8 +50,6 @@
         "zod": "^3.22.4"
     },
     "devDependencies": {
-        "@types/compression": "^1.7.5",
-        "@types/cors": "^2.8.17",
         "@types/jest": "^29.5.8",
         "@types/supertest": "^2.0.16",
         "@typescript-eslint/eslint-plugin": "^6.13.1",
